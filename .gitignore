@@ -1,0 +1,4 @@
+# Tooling
+/.clj-kondo/.cache
+/.clj-kondo/imports
+/.cpcache
