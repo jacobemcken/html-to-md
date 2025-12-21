@@ -3,6 +3,8 @@
             [html-to-md.hiccup-to-md :as hiccup-to-md]))
 
 (defn get-hiccup-body
+  "Takes a HTML string, converts it to Hiccup and return the `:body` element.
+   Stripping the `:html` and `:head` tags."
   [html]
   (->> html
        hickory/parse
