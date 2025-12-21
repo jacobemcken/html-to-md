@@ -1,5 +1,5 @@
 (ns html-to-md.hiccup-to-md-test
-  (:require [clojure.test :refer [are deftest testing]]
+  (:require [clojure.test :refer [are deftest is testing]]
             [html-to-md.hiccup-to-md :as sut]))
 
 (deftest child-elements
@@ -67,3 +67,15 @@
 
       "[Some link](https://clojure.org)"
       [:a {:href "https://clojure.org"} [:span "Some"] " " [:span "link"]])))
+
+(deftest ordered-list
+  (is (= "1. Elephant\n2. Tiger"
+         (sut/convert [:ol [:li "Elephant"] [:li "Tiger"]]))))
+
+(deftest unordered-list
+  (is (= "- Elephant\n- Tiger"
+         (sut/convert [:ul [:li "Elephant"] [:li "Tiger"]]))))
+
+(deftest blockquote
+  (is (= "\n\n> This is a quote.\n> on multiple lines."
+         (sut/convert [:blockquote "This is a quote.  \n" "   on multiple lines."]))))

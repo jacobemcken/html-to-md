@@ -13,7 +13,7 @@
     ::text
     (when (vector? element)
       (let [tag (first element)]
-        (if (#{:span :div :small :body} tag)
+        (if (#{:span :div :small :body :nav :article :time :li :footer :section} tag)
           ::phrasing-content
           tag)))))
 
@@ -43,6 +43,25 @@
            "(" (:href attr) ")")
       link-text)))
 
+(defmethod convert :img
+  [[_tag attr & _elements :as _element]]
+  (when (map? attr)
+    (str "![" (:alt attr) "]"
+         "(" (:src attr) ")")))
+
+(defmethod convert :ol
+  [element]
+  (->> (child-elements element)
+       (map (fn [idx li-element]
+              (str idx ". " (convert li-element))) (drop 1 (range)))
+       (str/join "\n")))
+
+(defmethod convert :ul
+  [element]
+  (->> (child-elements element)
+       (map #(str "- " (convert %)))
+       (str/join "\n")))
+
 (defmethod convert ::phrasing-content
   [element]
   (->> (child-elements element)
@@ -56,6 +75,26 @@
 (defmethod convert :pre
   [element]
   (some-wrap element #(str "```\n" % "\n```")))
+
+(defmethod convert :blockquote
+  [element]
+  (some-wrap element #(->> (str/split % #"\n")
+                           (map str/trim)
+                           (str/join "\n> ")
+                           (str "\n\n> "))))
+
+(defmethod convert :abbr
+  [[_tag attr & _elements :as element]]
+  (when-let [abbr-text (get-text element)]
+    (str abbr-text (when (map? attr) (str " (" (:title attr) ")")))))
+
+(defmethod convert :br
+  [_element]
+  "\n")
+
+(defmethod convert :hr
+  [_element]
+  "\n\n---\n\n")
 
 (defmethod convert :em
   [element]
