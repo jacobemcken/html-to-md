@@ -52,6 +52,7 @@
 (defmethod convert :ol
   [element]
   (->> (child-elements element)
+       (remove string?)
        (map (fn [idx li-element]
               (str idx ". " (convert li-element))) (drop 1 (range)))
        (str/join "\n")))
@@ -59,7 +60,8 @@
 (defmethod convert :ul
   [element]
   (->> (child-elements element)
-       (map #(str "- " (convert %)))
+       (keep #(when-not (string? %)
+                (str "- " (convert %))))
        (str/join "\n")))
 
 (defmethod convert ::phrasing-content

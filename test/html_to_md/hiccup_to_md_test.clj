@@ -70,11 +70,11 @@
 
 (deftest ordered-list
   (is (= "1. Elephant\n2. Tiger"
-         (sut/convert [:ol [:li "Elephant"] [:li "Tiger"]]))))
+         (sut/convert [:ol "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
 
 (deftest unordered-list
   (is (= "- Elephant\n- Tiger"
-         (sut/convert [:ul [:li "Elephant"] [:li "Tiger"]]))))
+         (sut/convert [:ul "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
 
 (deftest blockquote
   (is (= "\n\n> This is a quote.\n> on multiple lines."
