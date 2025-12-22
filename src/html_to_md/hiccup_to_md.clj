@@ -13,7 +13,7 @@
     ::text
     (when (vector? element)
       (let [tag (first element)]
-        (if (#{:span :div :small :body :nav :article :time :li :footer :section} tag)
+        (if (#{:span :div :small :body :nav :article :time :footer :section} tag)
           ::phrasing-content
           tag)))))
 
@@ -49,20 +49,41 @@
     (str "![" (:alt attr) "]"
          "(" (:src attr) ")")))
 
-(defmethod convert-element :ol
+(defmethod convert-element :li
   [ctx element]
-  (->> (child-elements element)
-       (remove string?)
-       (map (fn [idx li-element]
-              (str idx ". " (convert-element ctx li-element))) (drop 1 (range)))
-       (str/join "\n")))
+  (let [{:keys [list-nesting render] :or {list-nesting 0}} ctx]
+    (render list-nesting (get-text ctx element))))
+
+(defn unorderen-list-item
+  [nesting text]
+  (str (apply str (take nesting (repeat "    "))) "- " text))
+
+(defn orderen-list-item
+  [no-atom nesting text]
+  (str (apply str (take nesting (repeat "    ")))
+       (swap! no-atom (fnil inc 0))
+       ". " text))
 
 (defmethod convert-element :ul
-  [ctx element]
-  (->> (child-elements element)
-       (keep #(when-not (string? %)
-                (str "- " (convert-element ctx %))))
-       (str/join "\n")))
+  [orig-ctx element]
+  (let [ctx (-> orig-ctx
+                (update :list-nesting (fnil inc -1))
+                (assoc :render unorderen-list-item))]
+    (->> (child-elements element)
+         (keep #(when-not (string? %)
+                  (convert-element ctx %)))
+         (str/join "\n"))))
+
+(defmethod convert-element :ol
+  [orig-ctx element]
+  (let [ctx (-> orig-ctx
+                (update :list-nesting (fnil inc -1))
+                (assoc :render (let [no-atom (atom 0)]
+                                 (partial orderen-list-item no-atom))))]
+    (->> (child-elements element)
+         (keep #(when-not (string? %)
+                  (convert-element ctx %)))
+         (str/join "\n"))))
 
 (defmethod convert-element ::phrasing-content
   [ctx element]

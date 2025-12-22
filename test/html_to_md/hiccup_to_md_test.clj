@@ -1,6 +1,8 @@
 (ns html-to-md.hiccup-to-md-test
-  (:require [clojure.test :refer [are deftest is testing]]
-            [html-to-md.hiccup-to-md :as sut]))
+  (:require
+   [clojure.string :as str]
+   [clojure.test :refer [are deftest is testing]]
+   [html-to-md.hiccup-to-md :as sut]))
 
 (deftest child-elements
   (testing "Identifying children correctly regardless of element having attributes"
@@ -74,7 +76,17 @@
 
 (deftest unordered-list
   (is (= "- Elephant\n- Tiger"
-         (sut/convert-element {} [:ul "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
+         (sut/convert-element {} [:ul "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]])))
+  (is (= (str/join "\n" ["- Elephant"
+                         "    - Dwarf"
+                         "    - Gigant"
+                         "- Tiger"])
+         (sut/convert-element {} [:ul "\n   "
+                                  [:li "Elephant"]
+                                  [:ul [:li "Dwarf"]
+                                   [:li "Gigant"]]
+                                  "\n   "
+                                  [:li "Tiger"]]))))
 
 (deftest blockquote
   (is (= "\n\n> This is a quote.\n> on multiple lines."
