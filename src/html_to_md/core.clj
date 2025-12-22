@@ -16,6 +16,4 @@
 
 (defn convert
   [html]
-  (-> html
-      get-hiccup-body
-      hiccup-to-md/convert))
+  (hiccup-to-md/convert-element {} (get-hiccup-body html)))

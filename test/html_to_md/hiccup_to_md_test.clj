@@ -22,7 +22,7 @@
 
 (deftest get-text
   (are [text element]
-       (= text (sut/get-text element))
+       (= text (sut/get-text {} element))
 
     "Hi there"
     [:div [:span "Hi"] " " [:span "there"]]
@@ -39,7 +39,7 @@
 (deftest some-wrap
   (testing "Helper function for many tags like h1, em, code etc."
     (are [text element]
-         (= text (sut/some-wrap element #(str "*" % "*")))
+         (= text (sut/some-wrap {} element #(str "*" % "*")))
 
       "*Hi there*"
       [:div [:span "Hi"] " " [:span "there"]]
@@ -60,7 +60,7 @@
   (testing "Converting HTML link to markdown"
     (are [link-text link-hiccup]
          (= link-text
-            (sut/convert link-hiccup))
+            (sut/convert-element {} link-hiccup))
 
       "[Some link](https://clojure.org)"
       [:a {:href "https://clojure.org"} "Some link"]
@@ -70,12 +70,12 @@
 
 (deftest ordered-list
   (is (= "1. Elephant\n2. Tiger"
-         (sut/convert [:ol "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
+         (sut/convert-element {} [:ol "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
 
 (deftest unordered-list
   (is (= "- Elephant\n- Tiger"
-         (sut/convert [:ul "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
+         (sut/convert-element {} [:ul "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
 
 (deftest blockquote
   (is (= "\n\n> This is a quote.\n> on multiple lines."
-         (sut/convert [:blockquote "This is a quote.  \n" "   on multiple lines."]))))
+         (sut/convert-element {} [:blockquote "This is a quote.  \n" "   on multiple lines."]))))
