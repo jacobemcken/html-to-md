@@ -54,13 +54,17 @@
   (let [{:keys [list-nesting render] :or {list-nesting 0}} ctx]
     (render list-nesting (get-text ctx element))))
 
+(defn indent
+  [level]
+  (apply str (take level (repeat "    "))))
+
 (defn unorderen-list-item
-  [nesting text]
-  (str (apply str (take nesting (repeat "    "))) "- " text))
+  [nesting-level text]
+  (str (indent nesting-level) "- " text))
 
 (defn orderen-list-item
-  [no-atom nesting text]
-  (str (apply str (take nesting (repeat "    ")))
+  [no-atom nesting-level text]
+  (str (indent nesting-level)
        (swap! no-atom (fnil inc 0))
        ". " text))
 
