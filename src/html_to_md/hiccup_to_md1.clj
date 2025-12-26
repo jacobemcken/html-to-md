@@ -119,3 +119,15 @@
               (recur (rest elements)
                      return-elements
                      (join previous-element current-element)))))))))
+
+(comment
+  (def blockq (repeat "> "))
+  (def liste (concat ["- "] (repeat "  ")))
+
+  (->> (str/split "punktA linje 1\npunktA linje2\nog en laaaaang linje 3 some virkelig batter" #"\n")
+       (conj [blockq liste])
+       (apply map (fn [& line] (apply str line)))
+       (str/join "\n")
+       println)
+
+  )
