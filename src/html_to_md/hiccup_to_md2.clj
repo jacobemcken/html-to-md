@@ -113,7 +113,7 @@
   (some->> (child-elements element)
            (mapcat #(convert-element ctx %))
            splice
-           (as-block {:prefix nil #_(repeat "> ") :spacing 2})
+           (as-block {:spacing 2})
            list))
 
 (defmethod convert-element :ul
@@ -121,7 +121,7 @@
   (some->> (child-elements element)
            (mapcat #(convert-element ctx %))
            splice
-           (as-block {:prefix (repeat nil) :spacing 1})
+           (as-block {:spacing 2})
            list))
 
 (defmethod convert-element :li
@@ -212,18 +212,19 @@
 
 (defn combine-prefix-seq
   [current-prefix-seq extra-prefix-seq]
-  (->> (if (seq? extra-prefix-seq) ; create a fallback if no new-prefix-seq(uence) is provided
-         extra-prefix-seq
-         (repeat nil))
-       (map str current-prefix-seq)))
+  (into [] (cond-> current-prefix-seq
+             (seq? extra-prefix-seq)
+             (conj extra-prefix-seq))))
 
 (defn unfold
   "Flatten the intermediate Markdown structure.
-   The returned value only needs to have vertical spacing applied and prefixed every line."
-  [prefix-seq parent-spacing all-elements]
+   The returned value only needs to have vertical spacing applied and prefixed every line.
+   
+   `prefix-seqs` MUST be a vector at all times to maintain correct indenting."
+  [prefix-seqs parent-spacing all-elements]
   (loop [elements all-elements
          return-elements []] ;result
-    (println "\n===== (new)") (prn (no-infinity elements)) (prn (no-infinity return-elements)) (prn (take 2 prefix-seq))(println "=====")
+    (println "\n===== (new)") (prn (no-infinity elements)) (prn (no-infinity return-elements)) (prn (no-infinity prefix-seqs))(println "=====")
     (if-not (seq elements)
       return-elements
 
@@ -232,15 +233,15 @@
         (if (block? current-element)
           (let [[_ attr & children] current-element
                 [spacing new-prefix-seq] (if first-iteration?
-                                           [parent-spacing (combine-prefix-seq prefix-seq (:prefix attr))]
-                                           [(:spacing attr) (rest (combine-prefix-seq prefix-seq (:prefix attr)))])
+                                           [parent-spacing (combine-prefix-seq prefix-seqs (:prefix attr))]
+                                           [(:spacing attr) (combine-prefix-seq (mapv rest prefix-seqs) (:prefix attr))])
                 flow-elements (unfold new-prefix-seq spacing children)]
             (println "end block")
             (recur (rest elements)
                    (concat return-elements flow-elements)))
           (recur (rest elements)
                  (conj return-elements (assoc current-element
-                                              :prefix prefix-seq
+                                              :prefix prefix-seqs
                                               :spacing (when first-iteration? parent-spacing)))))))))
 
 (comment
@@ -264,7 +265,8 @@
     [prefix-seq all-elements]
     (->> all-elements
          (unfold prefix-seq 2)
-         (map #(update % :prefix (fn [prefix] (take 3 prefix))))))
+         (map #(update % :prefix no-infinity))
+         (map #(dissoc % :left :right))))
   )
 
 ;; insert block spacings (newlines)
@@ -301,7 +303,7 @@
                     [:li "B\nb"]
                     [:li "C\nc"]]]
        [:li "D\nd"]])
-  (no-infinity (unfoldz (repeat nil) (convert-element {} b8)))
+  (no-infinity (unfoldz [] (convert-element {} b8)))
 
   [:block {:spacing 2}
    [:block   {:spacing 1 :prefix '("-   " "    ")} "A\na"
@@ -317,9 +319,9 @@
   )
 
 (defn render-text
-  [prefix-seq text]
+  [prefix-seqs text]
   (some->> (str/split text #"\n") ;; TODO is some->> necessary here - if so include test cases exposing it
-           (map str prefix-seq)))
+           (apply map str prefix-seqs)))
 
 (defn render-elements
   [all-elements]
