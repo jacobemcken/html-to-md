@@ -113,7 +113,7 @@
   (some->> (child-elements element)
            (mapcat #(convert-element ctx %))
            splice
-           (as-block {:spacing 2})
+           (as-block {:spacing true})
            list))
 
 (defmethod convert-element :ul
@@ -121,7 +121,7 @@
   (some->> (child-elements element)
            (mapcat #(convert-element ctx %))
            splice
-           (as-block {:spacing 2})
+           (as-block {:spacing true})
            list))
 
 (defmethod convert-element :li
@@ -129,7 +129,7 @@
   (some->> (child-elements element)
            (mapcat #(convert-element ctx %))
            splice
-           (as-block {:prefix (concat ["- "] (repeat "  ")) :spacing 1})
+           (as-block {:prefix (concat ["-   "] (repeat "    "))})
            list))
 
 (defn calc-inline-margins
@@ -216,6 +216,11 @@
              (seq? extra-prefix-seq)
              (conj extra-prefix-seq))))
 
+(defn skip-first
+  "Takes a vector of collections and skips the first element in ALL collections."
+  [colls]
+  (mapv rest colls))
+
 (defn unfold
   "Flatten the intermediate Markdown structure.
    The returned value only needs to have vertical spacing applied and prefixed every line.
@@ -234,8 +239,8 @@
           (let [[_ attr & children] current-element
                 [spacing new-prefix-seq] (if first-iteration?
                                            [parent-spacing (combine-prefix-seq prefix-seqs (:prefix attr))]
-                                           [(:spacing attr) (combine-prefix-seq (mapv rest prefix-seqs) (:prefix attr))])
-                flow-elements (unfold new-prefix-seq spacing children)]
+                                           [(:spacing attr) (combine-prefix-seq (skip-first prefix-seqs) (:prefix attr))])
+                flow-elements (unfold new-prefix-seq (when-not first-iteration? spacing) children)]
             (println "end block")
             (recur (rest elements)
                    (concat return-elements flow-elements)))
@@ -264,7 +269,7 @@
   (defn unfoldz
     [prefix-seq all-elements]
     (->> all-elements
-         (unfold prefix-seq 2)
+         (unfold prefix-seq false)
          (map #(update % :prefix no-infinity))
          (map #(dissoc % :left :right))))
   )
@@ -320,32 +325,26 @@
 
 (defn render-text
   [prefix-seqs text]
-  (some->> (str/split text #"\n") ;; TODO is some->> necessary here - if so include test cases exposing it
-           (apply map str prefix-seqs)))
+  (->> (str/split text #"\n")
+       (conj prefix-seqs)
+       (apply map str)))
 
 (defn render-elements
   [all-elements]
   (loop [elements all-elements
-         spacing-prefix (repeat nil)
-         text-lines '()]
+         [previous-spacing previous-prefix-seqs] [true []]
+         text-lines (list)]
     (if-not (seq elements)
       (->> text-lines
            rest ; remove the initial spacing line caused by initial spacing-prefix
-           (str/join "\n" ))
+           (str/join "\n"))
 
       (let [{:keys [prefix text spacing] :as _element} (first elements)]
         (recur (rest elements)
-               (when (<= 2 spacing) prefix)
+               [spacing prefix]
                (concat text-lines
-                       (when spacing-prefix
-                         (map str spacing-prefix '("\n")))
-                       (render-text prefix text)))
-        )
-      )))
-
-(conj [1 2 3] 4)
-;; 2. dimensions of complexity
-;; - Prefix related to nesting: lists within blockqoutes within lists
-;; - Spacing
-;;   - Horizontal between inline content
-;;   - Vertical between block content
+                       (when (or spacing previous-spacing) 
+                         ;; when applyin spacing always use the least nesting (lowest prefix sequence count)
+                         (let [prefix-seqs (apply min-key count [previous-prefix-seqs prefix])]
+                           (render-text (skip-first prefix-seqs) "")))
+                       (render-text prefix text)))))))
