@@ -4,90 +4,85 @@
    [clojure.test :refer [are deftest is testing]]
    [html-to-md.hiccup-to-md :as sut]))
 
-(deftest child-elements
-  (testing "Identifying children correctly regardless of element having attributes"
-    (are [child-elements element]
-         (= child-elements
-            (sut/child-elements element))
+(deftest lists
+  (testing "Unordered lists"
+    (are [markdown-lines hiccup]
+         (= (str/join "\n" markdown-lines)
+            (sut/as-markdown hiccup))
 
-      [[:span {:class "red"} "A"] "B" [:span "C"]]
-      [:div {:class "blue"} [:span {:class "red"} "A"] "B" [:span "C"]]
+      ;; A simple list
+      ["-   Banana"
+       "-   Apple"
+       "-   Orange"]
+      [:ul ;"\n"
+       [:li "Banana"]
+       [:li "Apple"] ;"\n"
+       [:li "Orange"]]
 
-      ["A" "B" [:span "C"]]
-      [:div "A" "B" [:span "C"]]
+      ;; Nested lists
+      ["-   Fruit"
+       "    -   Kiwi"
+       "    -   Melon"
+       "    -   Pear"
+       "-   Dairy"
+       "    -   Milk"
+       "    -   Cheese"]
+      [:ul
+       [:li "Fruit"
+        [:ul
+         [:li "Kiwi"]
+         [:li "Melon"] ;"\n"
+         [:li "Pear"]]]
+       [:li "Dairy"
+        [:ul
+         [:li "Milk"]
+         [:li "Cheese"]]]])))
 
-      nil
-      [:div {:class "blue"}]
+(deftest blockqoutes
+  (testing "Unordered lists"
+    (are [markdown-lines hiccup]
+         (= markdown-lines
+            (str/split (sut/as-markdown hiccup) #"\n"))
 
-      nil
-      [:div])))
+      ;; A simple blockqoute
+      ["> Some text"]
+      [:blockquote "Some text"]
 
-(deftest get-text
-  (are [text element]
-       (= text (sut/get-text {} element))
+      ;; A blockqoute with multiple paragraphs
+      ["> Some text"
+       "> "
+       "> Some other text"]
+      [:blockquote [:p "Some text"] [:p "Some other text"]])))
 
-    "Hi there"
-    [:div [:span "Hi"] " " [:span "there"]]
+(deftest combined
+  (testing "A combination of nested block elements"
+    (are [markdown-lines hiccup]
+         (= markdown-lines
+            (str/split (sut/as-markdown hiccup) #"\n"))
 
-    "Hi there"
-    [:div "Hi " [:span "there"]]
+      ; Lists and headings inside a blockquote
+      ["> # Some heading"
+       "> "
+       "> This is the important list:"
+       "> -   Fruit"
+       ">     -   Apple"
+       ">     -   Banana"]
+      [:blockquote
+       [:h1 "Some heading"]
+       "This is the important list:"
+       [:ul
+        [:li "Fruit"
+         [:ul
+          [:li "Apple"]
+          [:li "Banana"]]]]]
 
-    "Hi there"
-    [:div "Hi" " there"]
-
-    "Hi there"
-    [:div "Hi there"]))
-
-(deftest some-wrap
-  (testing "Helper function for many tags like h1, em, code etc."
-    (are [text element]
-         (= text (sut/some-wrap {} element #(str "*" % "*")))
-
-      "*Hi there*"
-      [:div [:span "Hi"] " " [:span "there"]]
-
-      "*Hi there*"
-      [:div "Hi " [:span "there"]]
-
-      "*Hi there*"
-      [:div "Hi" " there"]
-
-      "*Hi there*"
-      [:div "Hi there"]
-
-      nil
-      [:div {:class "red"}])))
-
-(deftest ahref-convert
-  (testing "Converting HTML link to markdown"
-    (are [link-text link-hiccup]
-         (= link-text
-            (sut/convert-element {} link-hiccup))
-
-      "[Some link](https://clojure.org)"
-      [:a {:href "https://clojure.org"} "Some link"]
-
-      "[Some link](https://clojure.org)"
-      [:a {:href "https://clojure.org"} [:span "Some"] " " [:span "link"]])))
-
-(deftest ordered-list
-  (is (= "1. Elephant\n2. Tiger"
-         (sut/convert-element {} [:ol "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]]))))
-
-(deftest unordered-list
-  (is (= "- Elephant\n- Tiger"
-         (sut/convert-element {} [:ul "\n   " [:li "Elephant"] "\n   " [:li "Tiger"]])))
-  (is (= (str/join "\n" ["- Elephant"
-                         "    - Dwarf"
-                         "    - Gigant"
-                         "- Tiger"])
-         (sut/convert-element {} [:ul "\n   "
-                                  [:li "Elephant"]
-                                  [:ul [:li "Dwarf"]
-                                   [:li "Gigant"]]
-                                  "\n   "
-                                  [:li "Tiger"]]))))
-
-(deftest blockquote
-  (is (= "\n\n> This is a quote.\n> on multiple lines."
-         (sut/convert-element {} [:blockquote "This is a quote.  \n" "   on multiple lines."]))))
+      ; A blockqoute inside a list
+      ["-   > X"
+       "    > "
+       "    > Y"
+       "-   Z"
+       "    "
+       "    W"]
+      [:ul
+       [:li [:blockquote [:p "X"] [:p "Y"]]]
+       [:li [:p "Z"] [:p "W"]]])))
