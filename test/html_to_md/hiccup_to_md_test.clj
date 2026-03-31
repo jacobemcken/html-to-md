@@ -86,3 +86,12 @@
       [:ul
        [:li [:blockquote [:p "X"] [:p "Y"]]]
        [:li [:p "Z"] [:p "W"]]])))
+
+(deftest inline-formatting
+  (testing "Emphasis formatting"
+    (are [expected hiccup]
+         (= expected (sut/as-markdown hiccup))
+
+      ;; Simple italic text
+      "*italic*"
+      [:em "italic"])))

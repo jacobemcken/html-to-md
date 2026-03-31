@@ -130,6 +130,14 @@
                       :prefix (repeat "> ")})
            list))
 
+(defmethod render-elements :em
+  [ctx element]
+  (some->> (child-elements element)
+           (mapcat #(render-elements ctx %))
+           splice
+           (map #(update % :text (fn [t] (str "*" t "*"))))
+           (into [])))
+
 (defn calc-inline-margins
   "Calculate margins of inline content."
   [^CharSequence s]
