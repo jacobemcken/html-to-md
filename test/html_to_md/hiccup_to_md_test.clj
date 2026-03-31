@@ -94,4 +94,15 @@
 
       ;; Simple italic text
       "*italic*"
-      [:em "italic"])))
+      [:em "italic"])
+
+    (testing "Emphasis in list items"
+      (are [markdown-lines hiccup]
+           (= (str/join "\n" markdown-lines)
+              (sut/as-markdown hiccup))
+      
+        ["-   *italic* item"
+         "-   normal item"]
+        [:ul
+         [:li [:em "italic"] " item"]
+         [:li "normal item"]]))))
