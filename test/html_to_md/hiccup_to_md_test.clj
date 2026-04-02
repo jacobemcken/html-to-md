@@ -89,20 +89,46 @@
 
 (deftest inline-formatting
   (testing "Emphasis formatting"
-    (are [expected hiccup]
-         (= expected (sut/as-markdown hiccup))
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
 
       ;; Simple italic text
-      "*italic*"
-      [:em "italic"])
+      ["_italic_"]
+      [:em "italic"]
 
-    (testing "Emphasis in list items"
-      (are [markdown-lines hiccup]
-           (= (str/join "\n" markdown-lines)
-              (sut/as-markdown hiccup))
-      
-        ["-   *italic* item"
-         "-   normal item"]
+      ;; Emphasis in lists
+      ["-   _italic_ item"
+       "-   normal item"]
+      [:ul
+       [:li [:em "italic"] " item"]
+       [:li "normal item"]]
+
+      ;; Emphasis in blockquotes
+      ["> _important_"]
+      [:blockquote [:p [:em "important"]]]
+
+      ["> _important_ list:"
+       "> "
+       "> -   _first_ item"
+       "> -   _second_ item"]
+      [:blockquote
+       [:p [:em "important"] " list:"]
+       [:ul
+        [:li [:em "first"] " item"]
+        [:li [:em "second"] " item"]]]
+
+      ;; Emphasis in nested structures
+      ["> # Some _Title_"
+       "> "
+       "> _Introduction_ text"]
+      [:blockquote
+       [:h1 "Some " [:em "Title"]]
+       [:p [:em "Introduction"] " text"]]
+
+      ["-   _main_ item"
+       "    -   _nested_ item"]
+      [:ul
+       [:li [:em "main"] " item"
         [:ul
-         [:li [:em "italic"] " item"]
-         [:li "normal item"]]))))
+         [:li [:em "nested"] " item"]]]])))

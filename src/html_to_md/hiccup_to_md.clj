@@ -135,7 +135,7 @@
   (some->> (child-elements element)
            (mapcat #(render-elements ctx %))
            splice
-           (map #(update % :text (fn [t] (str "*" t "*"))))
+           (map #(update % :text (fn [t] (str "_" t "_"))))
            (into [])))
 
 (defn calc-inline-margins
