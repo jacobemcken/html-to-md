@@ -23,16 +23,18 @@
    Supports `nil` to represent nothing instead of an `inline` element.
 
    Does not support weird elements like `{:text \"some text\"}`
-   or `{:left 1 :right 0 :text nil}` or `{:left 1 :right 0 :text \"\"}`" ;; TODO why not this last one containing empty string - needs example in test case
+   or `{:left 1 :right 0 :text nil}`"
   [element-a element-b]
   (if-not (and element-a element-b)
     (or element-a element-b)
     {:left (:left element-a)
-     :right (:right element-b)
-     :text (str (:text element-a)
-                (apply str (repeat (max (or (:right element-a) 0)
-                                        (or (:left element-b) 0)) " "))
-                (:text element-b))}))
+     :right (if (empty? (:text element-b))
+              (max (:left element-b) (:right element-b))
+              (:right element-b))
+     :text (->> (list (:text element-a) (:text element-b))
+                (keep not-empty)
+                (str/join (apply str (repeat (max (or (:right element-a) 0)
+                                                  (or (:left element-b) 0)) " "))))}))
 
 (defn splice
   "Simplifies the intermediate Markdown structure by 'joining' all inline content."

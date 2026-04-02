@@ -4,6 +4,49 @@
    [clojure.test :refer [are deftest is testing]]
    [html-to-md.hiccup-to-md :as sut]))
 
+(deftest splice
+  (testing "Splice inline (text) elements"
+    (are [expected-element inline-elements]
+         (= expected-element
+            (sut/splice inline-elements))
+
+      '({:text "A" :left 0 :right 0}) '({:text "A" :left 0 :right 0} nil)
+      '({:text "A" :left 0 :right 0}) '(nil {:text "A" :left 0 :right 0})
+
+      '({:text "A" :left 0 :right 1}) '({:text "A" :left 0 :right 0}
+                                        {:text ""  :left 0 :right 1})
+      '({:text "A" :left 0 :right 1}) '({:text "A" :left 0 :right 0}
+                                        {:text ""  :left 1 :right 0})
+      '({:text "A" :left 0 :right 1}) '({:text "A" :left 0 :right 0}
+                                        {:text ""  :left 1 :right 1})
+
+      '({:text "AB" :left 0 :right 0})  '({:text "A" :left 0 :right 0}
+                                          {:text "B" :left 0 :right 0})
+      '({:text "AB" :left 1 :right 0})  '({:text "A" :left 1 :right 0}
+                                          {:text "B" :left 0 :right 0})
+      '({:text "AB" :left 0 :right 1})  '({:text "A" :left 0 :right 0}
+                                          {:text "B" :left 0 :right 1})
+      '({:text "AB" :left 1 :right 1})  '({:text "A" :left 1 :right 0}
+                                          {:text "B" :left 0 :right 1})
+
+      '({:text "A B" :left 1 :right 1}) '({:text "A" :left 1 :right 1}
+                                          {:text "B" :left 0 :right 1})
+      '({:text "A B" :left 1 :right 1}) '({:text "A" :left 1 :right 0}
+                                          {:text "B" :left 1 :right 1})
+      '({:text "A B" :left 1 :right 1}) '({:text "A" :left 1 :right 1}
+                                          {:text "B" :left 1 :right 1})
+
+      '({:text "A B" :left 0 :right 0}) '({:text "A" :left 0 :right 1}
+                                          {:text "B" :left 0 :right 0})
+      '({:text "A B" :left 0 :right 0}) '({:text "A" :left 0 :right 0}
+                                          {:text "B" :left 1 :right 0})
+      '({:text "A B" :left 0 :right 0}) '({:text "A" :left 0 :right 1}
+                                          {:text "B" :left 1 :right 0})
+
+      ;; This will only ever be needed if trimming multiple whitespace is undesired
+      '({:text "A  B" :left 2 :right 3}) '({:text "A" :left 2 :right 1}
+                                           {:text "B" :left 2 :right 3}))))
+
 (deftest lists
   (testing "Unordered lists"
     (are [markdown-lines hiccup]
