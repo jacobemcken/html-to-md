@@ -81,7 +81,9 @@
   [ctx element]
   (->> (child-elements element)
        ;(map #(do (println "children" %) %))
-       (mapcat #(render-elements ctx %))))
+       (mapcat #(render-elements ctx %))
+       ;; splice again after unpacking to support nested formatting like emphasised code
+       splice))
 
 (defn as-block
   [attr elements]
@@ -137,8 +139,14 @@
   (some->> (child-elements element)
            (mapcat #(render-elements ctx %))
            splice
-           (map #(update % :text (fn [t] (str "_" t "_"))))
-           (into [])))
+           (mapv #(update % :text (fn [t] (str "_" t "_"))))))
+
+(defmethod render-elements :strong
+  [ctx element]
+  (some->> (child-elements element)
+           (mapcat #(render-elements ctx %))
+           splice
+           (mapv #(update % :text (fn [t] (str "**" t "**"))))))
 
 (defn calc-inline-margins
   "Calculate margins of inline content."

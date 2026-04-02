@@ -131,14 +131,17 @@
        [:li [:p "Z"] [:p "W"]]])))
 
 (deftest inline-formatting
-  (testing "Emphasis formatting"
+  (testing "Inline formatting"
     (are [expected-markdown-lines hiccup]
          (= (str/join "\n" expected-markdown-lines)
             (sut/as-markdown hiccup))
 
       ;; Simple italic text
-      ["_italic_"]
-      [:em "italic"]
+      ["_italic_ **strong** _**both**_"]
+
+
+      ;; Nested formated
+      [:span [:em "italic"] " " [:strong "strong"] " " [:em [:strong "both"]]]
 
       ;; Emphasis in lists
       ["-   _italic_ item"
