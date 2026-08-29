@@ -5,7 +5,7 @@
    
    Code inside a link doesn't work!!!!!! "
   (:require [clojure.string :as str]
-            [html-to-md.debug :refer [no-infinity simplify-unfold]]))
+            [html-to-md.debug :refer [simplify-unfold]]))
 
 (defn block?
   [element]
@@ -251,5 +251,7 @@
 (defn as-markdown
   [hiccup]
   (->> (render-elements {} hiccup)
+       ;; `unfoldz` is a debug version of `unfold`,
+       ;; truncating infinite prefix sequences to ease local debugging in REPL.
        (unfoldz '() {:before ::block :after ::block})
        arrange))

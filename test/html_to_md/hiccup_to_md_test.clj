@@ -81,6 +81,17 @@
          [:li "Milk"]
          [:li "Cheese"]]]])))
 
+(deftest multi-line-text
+  (testing "Multi-line text keeps every line"
+    (are [markdown-lines hiccup]
+         (= markdown-lines
+            (str/split (sut/as-markdown hiccup) #"\n"))
+
+      ["-   line1"
+       "    line2"
+       "    line3"]
+      [:ul [:li "line1\nline2\nline3"]])))
+
 (deftest blockqoutes
   (testing "Unordered lists"
     (are [markdown-lines hiccup]
