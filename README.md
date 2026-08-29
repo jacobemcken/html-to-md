@@ -1,6 +1,7 @@
 # html-to-md
 
-A Clojure library for converting HTML into Markdown.
+A Clojure library for converting HTML (e.g. from websites)
+into clean Markdown that is both human readable and LLM token-efficient.
 
 [![bb compatible](https://raw.githubusercontent.com/babashka/babashka/master/logo/badge.svg)](https://book.babashka.org#badges)
 
@@ -25,7 +26,7 @@ Running test suite:
 
 ## Architecture
 
-The library consist of two transformation layers:
+The library consists of two transformation layers:
 
 ```mermaid
 graph LR
@@ -34,14 +35,14 @@ graph LR
     C[Markdown]
 ```
 
-An existing library [Hickory][1] already handles HTML to Hiccup convertion quite well,
-**so this library just uses Hickory and focuses on Hiccup to Markdown convertion**.
+An existing library [Hickory][1] already handles HTML to Hiccup conversion quite well,
+**so this library just uses Hickory and focuses on Hiccup to Markdown conversion**.
 But includes Hickory as a dependency for convenience.
 
 To be able to generate "good looking" Markdown (without unnecessary whitespace),
-content is categorizes as either "inline" or "block" content.
+content is categorized as either "inline" or "block" content.
 The [content categories are borrowed from CSS because][2] they have some conceptual overlap.
-Block content use newlines to distance itself from other content.
+Block content uses newlines to distance itself from other content.
 Inline content uses space to distance itself from other content.
 
 
@@ -93,18 +94,18 @@ across **multiple **lines.
 ### Technical implementation
 
 There are two dimensions of complexity that the implementation needs to account for:
--   Prefixes related to nesting: lists within blockqoutes within lists
+-   Prefixes related to nesting: lists within blockquotes within lists
 -   Spacing
     -   Horizontal between inline content
     -   Vertical between block content
 
 All content that isn't block content is considered inline.
-Block content:
+Block content (not all are currently supported):
 
 - Paragraphs (`:p`)
 - Headers (`:h1` - `:h6`)
 - Lists (`:ul` & `:ol`)
-- List elements (`li`)
+- List elements (`:li`)
 - Blockquotes (`:blockquote`)
 - Preformatted (`:pre`)
 - Horizontal ruler (`:hr`)
