@@ -34,10 +34,20 @@
      :text (->> (list (:text element-a) (:text element-b))
                 (keep not-empty)
                 (str/join (apply str (repeat (max (or (:right element-a) 0)
-                                                  (or (:left element-b) 0)) " "))))}))
+                                                  (or (:left element-b) 0)) " ")))
+                not-empty)}))
+
+(defn has-content?
+  "Whether an element has relevant content for the output.
+
+   Relies on correct trimming of elements.
+   Most goes through `as-flow` but tags like `:pre` should preserve whitespace."
+  [element]
+  (or (block? element) (:text element)))
 
 (defn splice
-  "Simplifies the intermediate Markdown structure by 'joining' all inline content."
+  "Simplifies the intermediate Markdown structure by 'joining' all inline content.
+   Empty elements not relevant for spacing are dropped."
   [all-elements]
   (loop [elements all-elements
          return-elements [] ;result
@@ -46,7 +56,7 @@
     ;(println "===== (new splice)") (prn (no-infinity elements)) (prn (no-infinity return-elements)) (prn (no-infinity previous-element)) (println "=====")
     (if-not (seq elements)
       (cond-> return-elements
-        previous-element (conj previous-element))
+        (has-content? previous-element) (conj previous-element))
 
       (let [current-element (first elements)]
         (if-not (or (block? previous-element)
@@ -55,7 +65,9 @@
                  return-elements
                  (join previous-element current-element))
           (recur (rest elements)
-                 (into [] (concat return-elements (some-> previous-element (cons []))))
+                 (cond-> return-elements
+                   (has-content? previous-element)
+                   (conj previous-element))
                  current-element))))))
 
 (defn identify-tag-handler
@@ -163,8 +175,8 @@
         s-trimmed (not-empty (str/trim s-optimized))]
     (if s-trimmed
       (assoc (calc-inline-margins s-optimized) :text s-trimmed)
-      {:left 1 :right 1 :text ""}))) ; [:span "a"] " " [:span "b"]
-;; => {:left 0 :right 0 :text "a"} {:left 1 :right 1} :text ""} {:left 0 :right 0 :text "b"}
+      {:left 1 :right 1 :text nil}))) ; [:span "a"] " " [:span "b"]
+;; => {:left 0 :right 0 :text "a"} {:left 1 :right 1} :text nil} {:left 0 :right 0 :text "b"}
 
 (defmethod render-elements ::text
   [_ctx text-element]
@@ -223,7 +235,7 @@
 
 (defn render-text
   [prefix-seqs text]
-  (->> (str/split text #"\n")
+  (->> (str/split (or text "") #"\n")
        (conj prefix-seqs)
        (apply map str)))
 

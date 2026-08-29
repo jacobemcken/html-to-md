@@ -12,7 +12,7 @@ into clean Markdown that is both human readable and LLM token-efficient.
 (require '[html-to-md.core :as html-to-md])
 
 (html-to-md/convert "<h1>Some heading</h1> <p>Followed by some text</p>")
-; "# Some heading\n\n Followed by some text\n\n"
+; "# Some heading\n\nFollowed by some text"
 ```
 
 ## Development
@@ -88,7 +88,7 @@ becomes:
 Some text!
 
 More text,
-across **multiple **lines.
+across **multiple** lines.
 ```
 
 ### Technical implementation
