@@ -2,3 +2,4 @@
 /.clj-kondo/.cache
 /.clj-kondo/imports
 /.cpcache
+.nrepl-port
