@@ -160,6 +160,22 @@
            splice
            (mapv #(update % :text (fn [t] (str "**" t "**"))))))
 
+(defmethod render-elements :a
+  ;; Renders a link as `[text](href)`.
+  ;; Newlines in the link text are replaced by spaces,
+  ;; as a Markdown link must fit on a single line.
+  ;; A link without an `:href` attribute is rendered as plain text.
+  [ctx element]
+  (let [href (when (map? (second element)) (:href (second element)))]
+    (some->> (child-elements element)
+             (mapcat #(render-elements ctx %))
+             splice
+             (mapv #(update % :text
+                            (fn [t]
+                              (if href
+                                (str "[" (str/replace t #"\s*\n\s*" " ") "](" href ")")
+                                t)))))))
+
 (defn calc-inline-margins
   "Calculate margins of inline content."
   [^CharSequence s]

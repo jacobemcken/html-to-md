@@ -190,6 +190,40 @@
         [:ul
          [:li [:em "nested"] " item"]]]])))
 
+(deftest links
+  (testing "Links"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; A simple link in a paragraph
+      ["See [the docs](https://clojure.org)"]
+      [:p "See " [:a {:href "https://clojure.org"} "the docs"]]
+
+      ;; Link text with nested inline formatting
+      ["[Some _italic_ link](https://clojure.org)"]
+      [:a {:href "https://clojure.org"} "Some " [:em "italic"] " link"]
+
+      ;; A link inside emphasis (the reverse nesting)
+      ["_Some [link](https://clojure.org) here_"]
+      [:p [:em "Some " [:a {:href "https://clojure.org"} "link"] " here"]]
+
+      ;; Links in list items
+      ["-   See [the docs](https://clojure.org)"]
+      [:ul [:li "See " [:a {:href "https://clojure.org"} "the docs"]]]
+
+      ;; A link without an :href attribute is plain text
+      ["See Some link for more"]
+      [:p "See " [:a "Some link"] " for more"]
+
+      ;; Newlines in the link text are replaced by spaces
+      ["[link text](https://clojure.org)"]
+      [:a {:href "https://clojure.org"} "link\ntext"]
+
+      ;; Links in blockquotes
+      ["> See [quoted](https://clojure.org)"]
+      [:blockquote [:p "See " [:a {:href "https://clojure.org"} "quoted"]]])))
+
 (deftest whitespace-between-blocks
   (testing "Whitespace between block elements produces a single blank line"
     (are [expected-markdown-lines hiccup]
