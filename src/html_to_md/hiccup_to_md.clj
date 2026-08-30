@@ -1,9 +1,7 @@
 (ns html-to-md.hiccup-to-md
   "This namespace works on hiccup data structures.
 
-   Got differenciated margins working. Started to implement inline formatting like links and code.
-   
-   Code inside a link doesn't work!!!!!! "
+   Got differenciated margins working. Started to implement inline formatting like links and code."
   (:require [clojure.string :as str]
             [html-to-md.debug :refer [simplify-unfold]]))
 
@@ -175,6 +173,19 @@
                               (if href
                                 (str "[" (str/replace t #"\s*\n\s*" " ") "](" href ")")
                                 t)))))))
+
+(defmethod render-elements :code
+  ;; Renders inline code wrapped in backticks.
+  ;; Newlines in the code text are replaced by spaces,
+  ;; as inline code must fit on a single line
+  ;; (multi-line code is the job of `:pre`).
+  [ctx element]
+  (some->> (child-elements element)
+           (mapcat #(render-elements ctx %))
+           splice
+           (mapv #(update % :text
+                          (fn [t]
+                            (str "`" (str/replace t #"\s*\n\s*" " ") "`"))))))
 
 (defn calc-inline-margins
   "Calculate margins of inline content."

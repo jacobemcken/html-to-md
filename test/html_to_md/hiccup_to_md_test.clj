@@ -224,6 +224,32 @@
       ["> See [quoted](https://clojure.org)"]
       [:blockquote [:p "See " [:a {:href "https://clojure.org"} "quoted"]]])))
 
+(deftest code
+  (testing "Inline code"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Simple code in a paragraph
+      ["Run `clj -X:test` now"]
+      [:p "Run " [:code "clj -X:test"] " now"]
+
+      ;; Code inside a link (the case the old ns docstring said didn't work)
+      ["[See `core.clj`](https://clojure.org)"]
+      [:a {:href "https://clojure.org"} "See " [:code "core.clj"]]
+
+      ;; Code inside emphasis
+      ["_Use `-X:test` here_"]
+      [:p [:em "Use " [:code "-X:test"] " here"]]
+
+      ;; Code inside strong
+      ["**Run `clj -X:test`**"]
+      [:p [:strong "Run " [:code "clj -X:test"]]]
+
+      ;; Newlines in the code text are replaced by spaces
+      ["`foo bar`"]
+      [:p [:code "foo\nbar"]])))
+
 (deftest whitespace-between-blocks
   (testing "Whitespace between block elements produces a single blank line"
     (are [expected-markdown-lines hiccup]
