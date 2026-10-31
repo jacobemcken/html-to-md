@@ -151,21 +151,33 @@
        "    line3"]
       [:ul [:li "line1\nline2\nline3"]])))
 
-(deftest blockqoutes
-  (testing "Unordered lists"
+(deftest blockquotes
+  (testing "Different usages of blockquotes"
     (are [markdown-lines hiccup]
          (= markdown-lines
             (str/split (sut/as-markdown hiccup) #"\n"))
 
-      ;; A simple blockqoute
+      ;; A simple blockquote
       ["> Some text"]
       [:blockquote "Some text"]
 
-      ;; A blockqoute with multiple paragraphs
+      ;; A blockquote with multiple paragraphs
       ["> Some text"
        "> "
        "> Some other text"]
-      [:blockquote [:p "Some text"] [:p "Some other text"]])))
+      [:blockquote [:p "Some text"] [:p "Some other text"]]
+
+      ;; A blockquote with a list
+      ["> Some text"
+       "> "
+       "> -   List element"
+       "> -   Another list element"]
+      [:blockquote
+       [:p "Some text"]
+       [:ul
+        [:li "List element"]
+        [:li "Another list element"]]]
+      )))
 
 (deftest combined
   (testing "A combination of nested block elements"
@@ -189,7 +201,7 @@
           [:li "Apple"]
           [:li "Banana"]]]]]
 
-      ; A blockqoute inside a list
+      ; A blockquote inside a list
       ["-   > X"
        "    > "
        "    > Y"
