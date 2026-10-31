@@ -72,15 +72,13 @@
                  current-element))))))
 
 (defn identify-tag-handler
-  [element]
-  (if (string? element)
-    ::text
-    (when (vector? element)
-      (let [tag (first element)]
-        (cond
-          (#{:span :div :small :body :nav :article :time :footer :section} tag) ::phrasing-content
-          (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
-          :else tag)))))
+  [ctx element]
+  (let [tag (and (vector? element) (first element))] ; HTML-tag name (if element isn't text)
+    (cond
+      (string? element) ::text
+      (#{:span :div :small :body :nav :article :time :footer :section} tag) ::phrasing-content
+      (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
+      :else tag)))
 
 (comment
   (ns-unmap *ns* 'convert-element)
