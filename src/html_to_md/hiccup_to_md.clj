@@ -1,6 +1,9 @@
 (ns html-to-md.hiccup-to-md
   "This namespace works on hiccup data structures.
 
+   There is a lot of infinite sequences, that can make debugging a bit annoying.
+   Consider using html-to-md.debug/no-infinity to reduce output.
+
    Got differenciated margins working. Started to implement inline formatting like links and code."
   (:require [clojure.string :as str]
             [html-to-md.debug :refer [simplify-unfold]]))
@@ -79,11 +82,14 @@
           tag)))))
 
 (comment
-  (ns-unmap *ns* 'convert-element))
+  (ns-unmap *ns* 'convert-element)
+  (require '[html-to-md.debug :refer [no-infinity]])
+  )
 (defmulti render-elements
   (fn identify-element [_ctx element]
     (let [dispatch-value (identify-tag-handler element)]
       ;(println "got        " (no-infinity element)) (println "dispatch to" dispatch-value)
+      ;(println (some-> (:li _ctx) deref no-infinity))
       (or dispatch-value
           (throw (ex-info "Unable to parse element" {:element element}))))))
 
@@ -109,13 +115,30 @@
            (as-block {:spacing ::always})
            list))
 
+(def unordered-list-prefixes
+  (repeat (concat ["-   "] (repeat "    "))))
+
+(def ordered-list-prefixes
+  (->> (range)
+       (map #(concat [(str % ".  ")] (repeat "    ")))))
+
+(defmethod render-elements :ol
+  [ctx element]
+  (let [new-ctx (assoc ctx :li (atom ordered-list-prefixes))]
+    (some->> (child-elements element)
+             (mapcat #(render-elements new-ctx %))
+             splice
+             (as-block {:spacing ::block})
+             list)))
+
 (defmethod render-elements :ul
   [ctx element]
-  (some->> (child-elements element)
-           (mapcat #(render-elements ctx %))
-           splice
-           (as-block {:spacing ::block})
-           list))
+  (let [new-ctx (assoc ctx :li (atom unordered-list-prefixes))]
+    (some->> (child-elements element)
+             (mapcat #(render-elements new-ctx %))
+             splice
+             (as-block {:spacing ::block})
+             list)))
 
 (defmethod render-elements :li
   [ctx element]
@@ -123,7 +146,7 @@
            (mapcat #(render-elements ctx %))
            splice
            (as-block {:spacing ::text
-                      :prefix (concat ["-   "] (repeat "    "))})
+                      :prefix (first (swap! (:li ctx) rest))})
            list))
 
 (defmethod render-elements :h1

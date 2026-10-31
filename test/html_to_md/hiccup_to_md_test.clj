@@ -81,6 +81,65 @@
          [:li "Milk"]
          [:li "Cheese"]]]])))
 
+(deftest ordered-lists
+  (testing "Ordered lists"
+    (are [markdown-lines hiccup]
+         (= (str/join "\n" markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; A simple ordered list (ported from the old test case in scratch.md)
+      ["1.  Elephant"
+       "2.  Tiger"]
+      [:ol "\n   "
+       [:li "Elephant"]
+       "\n   "
+       [:li "Tiger"]]
+
+      ;; Ordered list nested in an unordered list
+      ["-   Fruit"
+       "    1.  Apple"
+       "    2.  Banana"]
+      [:ul
+       [:li "Fruit"
+        [:ol
+         [:li "Apple"]
+         [:li "Banana"]]]]
+
+      ;; Unordered list nested in an ordered list
+      ["1.  Fruit"
+       "    -   Apple"
+       "    -   Banana"
+       "2.  Dairy"]
+      [:ol
+       [:li "Fruit"
+        [:ul
+         [:li "Apple"]
+         [:li "Banana"]]]
+       [:li "Dairy"]]
+
+      ;; Complex nested list combination
+      ["-   Fruit"
+       "    1.  Banana"
+       "    2.  Apple"
+       "        1.  Discovery"
+       "        2.  Elstar"
+       "        3.  Baldwin"
+       "        4.  Gala"
+       "    3.  Kiwi"
+       "-   Dairy"]
+      [:ul
+       [:li "Fruit"
+        [:ol
+         [:li "Banana"]
+         [:li "Apple"
+          [:ol
+           [:li "Discovery"]
+           [:li "Elstar"]
+           [:li "Baldwin"]
+           [:li "Gala"]]]
+         [:li "Kiwi"]]]
+       [:li "Dairy"]])))
+
 (deftest multi-line-text
   (testing "Multi-line text keeps every line"
     (are [markdown-lines hiccup]
