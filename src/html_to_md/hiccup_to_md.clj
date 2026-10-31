@@ -75,18 +75,19 @@
   [ctx element]
   (let [tag (and (vector? element) (first element))] ; HTML-tag name (if element isn't text)
     (cond
+      (::fn ctx) ::fn
       (string? element) ::text
       (#{:span :div :small :body :nav :article :time :footer :section} tag) ::phrasing-content
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
       :else tag)))
 
 (comment
-  (ns-unmap *ns* 'convert-element)
+  (ns-unmap *ns* 'render-elements)
   (require '[html-to-md.debug :refer [no-infinity]])
   )
 (defmulti render-elements
-  (fn identify-element [_ctx element]
-    (let [dispatch-value (identify-tag-handler element)]
+  (fn identify-element [ctx element]
+    (let [dispatch-value (identify-tag-handler ctx element)]
       ;(println "got        " (no-infinity element)) (println "dispatch to" dispatch-value)
       ;(println (some-> (:li _ctx) deref no-infinity))
       (or dispatch-value
@@ -166,18 +167,33 @@
   [(as-block {:spacing ::always}
              [{:left 0 :right 0 :text "---"}])])
 
+;; This is used for an element to temparily override default behavior
+;; E.g. inside pre tags where tags behave differently
+(defmethod render-elements ::fn
+  [ctx element]
+  ((::fn ctx) ctx element))
+
+;; Permitted content: Phrasing content
+;; Source: https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Content_categories#phrasing_content
 (defmethod render-elements :pre
-  [_ctx element]
-  (let [raw-text (->> (child-elements element)
-                      (filter string?)
-                      (str/join))]
-    (some->> (when (re-find #"\S" raw-text)
-               (as-block {:spacing ::block}
-                         [{:left 0 :right 0
-                           :text (str "```\n"
-                                     (str/replace raw-text #"^\n+|\n+$" "")
-                                     "\n```")}]))
-             list)))
+  [ctx element]
+  (let [new-ctx (assoc ctx ::fn (fn special-render-for-pre
+                                  [ctx element]
+                                  (if (string? element)
+                                    (list {:left 0 :right 0 :text element})
+                                    (->> (child-elements element)
+                                         (mapcat #(render-elements ctx %))
+                                         splice))))
+        raw-text (->> (child-elements element)
+                      (mapcat #(render-elements new-ctx %))
+                      splice
+                      first
+                      :text)]
+    (when (re-find #"\S" raw-text) ; skip preformatted text that is entirely whitespace
+      (->> (as-block {:spacing ::block}
+                     [{:left 0 :right 0
+                       :text (str "```\n" raw-text "\n```")}])
+           list))))
 
 (defmethod render-elements :blockquote
   [ctx element]

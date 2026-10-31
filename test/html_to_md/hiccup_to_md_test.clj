@@ -427,8 +427,10 @@
 
       ;; Boundary newlines are trimmed
       ["```"
+       ""
        "  line1"
        "  line2"
+       ""
        "```"]
       [:body [:pre "\n  line1\n  line2\n"]]
 
