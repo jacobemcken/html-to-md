@@ -168,6 +168,19 @@
   [(as-block {:spacing ::always}
              [{:left 0 :right 0 :text "---"}])])
 
+(defmethod render-elements :pre
+  [_ctx element]
+  (let [raw-text (->> (child-elements element)
+                      (filter string?)
+                      (str/join))]
+    (some->> (when (re-find #"\S" raw-text)
+               (as-block {:spacing ::block}
+                         [{:left 0 :right 0
+                           :text (str "```\n"
+                                     (str/replace raw-text #"^\n+|\n+$" "")
+                                     "\n```")}]))
+             list)))
+
 (defmethod render-elements :blockquote
   [ctx element]
   (some->> (child-elements element)

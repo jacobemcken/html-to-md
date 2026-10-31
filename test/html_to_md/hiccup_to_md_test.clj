@@ -333,6 +333,50 @@
       ["`foo bar`"]
       [:p [:code "foo\nbar"]])))
 
+(deftest preformatted
+  (testing "Preformatted code preserves whitespace in a fenced block"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Multi-line with indentation preserved
+      ["```"
+       "  line1"
+       "  line2"
+       "```"]
+      [:body [:pre "  line1\n  line2"]]
+
+      ;; Single line
+      ["```"
+       "code"
+       "```"]
+      [:body [:pre "code"]]
+
+      ;; Inside a blockquote
+      ["> ```"
+       "> line1"
+       "> line2"
+       "> ```"]
+      [:body [:blockquote [:pre "line1\nline2"]]]
+
+      ;; Inside a list
+      ["-   ```"
+       "    line1"
+       "    line2"
+       "    ```"]
+      [:body [:ul [:li [:pre "line1\nline2"]]]]
+
+      ;; Boundary newlines are trimmed
+      ["```"
+       "  line1"
+       "  line2"
+       "```"]
+      [:body [:pre "\n  line1\n  line2\n"]]
+
+      ;; All-whitespace content renders as empty
+      [""]
+      [:body [:pre "   "]])))
+
 (deftest whitespace-between-blocks
   (testing "Whitespace between block elements produces a single blank line"
     (are [expected-markdown-lines hiccup]
