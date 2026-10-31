@@ -237,6 +237,11 @@
   [_ctx _element]
   [{:left 0 :right 0 :text "  \n"}])
 
+(defmethod render-elements :img
+  [_ctx element]
+  (let [{:keys [alt src]} (second element)]
+    [{:left 0 :right 0 :text (str "!" "[" (or alt "") "](" src ")")}]))
+
 (defn calc-inline-margins
   "Calculate margins of inline content."
   [^CharSequence s]

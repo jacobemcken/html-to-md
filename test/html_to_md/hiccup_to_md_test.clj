@@ -362,6 +362,36 @@
       ["[line1 line2](https://clojure.org)"]
       [:a {:href "https://clojure.org"} "line1" [:br] "line2"])))
 
+(deftest images
+  (testing "Images render as ![alt](src)"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Simple image with alt text
+      ["![a cat](cat.png)"]
+      [:p [:img {:src "cat.png" :alt "a cat"}]]
+
+      ;; Image without alt text
+      ["![](logo.png)"]
+      [:p [:img {:src "logo.png"}]]
+
+      ;; Image with surrounding text (margin spacing)
+      ["See ![a cat](cat.png) here"]
+      [:p "See " [:img {:src "cat.png" :alt "a cat"}] " here"]
+
+      ;; Image inside a link
+      ["[![a cat](cat.png)](https://example.com)"]
+      [:a {:href "https://example.com"} [:img {:src "cat.png" :alt "a cat"}]]
+
+      ;; Image in a list item
+      ["-   ![icon](icon.png)"]
+      [:ul [:li [:img {:src "icon.png" :alt "icon"}]]]
+
+      ;; Image in a blockquote
+      ["> ![diagram](diagram.png)"]
+      [:blockquote [:p [:img {:src "diagram.png" :alt "diagram"}]]])))
+
 (deftest preformatted
   (testing "Preformatted code preserves whitespace in a fenced block"
     (are [expected-markdown-lines hiccup]
