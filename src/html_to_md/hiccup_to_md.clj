@@ -233,6 +233,10 @@
                           (fn [t]
                             (str "`" (str/replace t #"\s*\n\s*" " ") "`"))))))
 
+(defmethod render-elements :br
+  [_ctx _element]
+  [{:left 0 :right 0 :text "  \n"}])
+
 (defn calc-inline-margins
   "Calculate margins of inline content."
   [^CharSequence s]

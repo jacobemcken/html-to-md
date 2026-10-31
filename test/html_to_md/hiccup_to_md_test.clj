@@ -333,6 +333,35 @@
       ["`foo bar`"]
       [:p [:code "foo\nbar"]])))
 
+(deftest line-breaks
+  (testing "Line breaks render as newlines inside inline text"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Simple br in a paragraph
+      ["hello  "
+       "world"]
+      [:p "hello" [:br] "world"]
+
+      ;; Br at the end of a paragraph
+      ["hello  "]
+      [:p "hello" [:br]]
+
+      ;; Br inside a list item (prefix on both lines)
+      ["-   line1  "
+       "    line2"]
+      [:ul [:li "line1" [:br] "line2"]]
+
+      ;; Br inside a blockquote
+      ["> line1  "
+       "> line2"]
+      [:blockquote [:p "line1" [:br] "line2"]]
+
+      ;; Br inside a link (newline replaced by space)
+      ["[line1 line2](https://clojure.org)"]
+      [:a {:href "https://clojure.org"} "line1" [:br] "line2"])))
+
 (deftest preformatted
   (testing "Preformatted code preserves whitespace in a fenced block"
     (are [expected-markdown-lines hiccup]
