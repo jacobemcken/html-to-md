@@ -212,6 +212,18 @@
        [:li [:blockquote [:p "X"] [:p "Y"]]]
        [:li [:p "Z"] [:p "W"]]])))
 
+(deftest headings
+  (testing "Headings render with the correct number of #"
+    (are [markdown hiccup]
+         (= markdown (sut/as-markdown hiccup))
+
+      "# Level one"     [:body [:h1 "Level one"]]
+      "## Level two"    [:body [:h2 "Level two"]]
+      "### Level three" [:body [:h3 "Level three"]]
+      "#### Level four" [:body [:h4 "Level four"]]
+      "##### Level five" [:body [:h5 "Level five"]]
+      "###### Level six" [:body [:h6 "Level six"]])))
+
 (deftest inline-formatting
   (testing "Inline formatting"
     (are [expected-markdown-lines hiccup]

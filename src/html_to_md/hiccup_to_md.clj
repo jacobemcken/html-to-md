@@ -77,9 +77,10 @@
     ::text
     (when (vector? element)
       (let [tag (first element)]
-        (if (#{:span :div :small :body :nav :article :time :footer :section} tag)
-          ::phrasing-content
-          tag)))))
+        (cond
+          (#{:span :div :small :body :nav :article :time :footer :section} tag) ::phrasing-content
+          (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
+          :else tag)))))
 
 (comment
   (ns-unmap *ns* 'convert-element)
@@ -149,14 +150,18 @@
                       :prefix (first (swap! (:li ctx) rest))})
            list))
 
-(defmethod render-elements :h1
+(def heading-levels
+  {:h1 1 :h2 2 :h3 3 :h4 4 :h5 5 :h6 6})
+
+(defmethod render-elements ::heading
   [ctx element]
-  (some->> (child-elements element)
-           (mapcat #(render-elements ctx %))
-           splice
-           (as-block {:spacing ::always
-                      :prefix (concat ["# "] (repeat ""))})
-           list))
+  (let [level (heading-levels (first element))]
+    (some->> (child-elements element)
+             (mapcat #(render-elements ctx %))
+             splice
+             (as-block {:spacing ::always
+                        :prefix (concat [(apply str (concat (repeat level "#") [" "]))] (repeat ""))})
+             list)))
 
 (defmethod render-elements :blockquote
   [ctx element]
