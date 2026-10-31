@@ -163,6 +163,11 @@
                         :prefix (concat [(apply str (concat (repeat level "#") [" "]))] (repeat ""))})
              list)))
 
+(defmethod render-elements :hr
+  [_ctx _element]
+  [(as-block {:spacing ::always}
+             [{:left 0 :right 0 :text "---"}])])
+
 (defmethod render-elements :blockquote
   [ctx element]
   (some->> (child-elements element)

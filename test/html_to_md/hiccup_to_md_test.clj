@@ -363,6 +363,30 @@
       ["A"]
       [:body " " [:p "A"] " "])))
 
+(deftest horizontal-rule
+  (testing "A horizontal rule renders as --- with blank lines around it"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Heading, hr, and paragraph
+      ["# Heading"
+       ""
+       "---"
+       ""
+       "Paragraph"]
+      [:body [:h1 "Heading"] [:hr] [:p "Paragraph"]]
+
+      ;; Standalone horizontal rule
+      ["---"]
+      [:body [:hr]]
+
+      ;; Two consecutive horizontal rules
+      ["---"
+       ""
+       "---"]
+      [:body [:hr] [:hr]])))
+
 (deftest whitespace-only-block
     (are [expected-markdown-lines hiccup]
      (= (str/join "\n" expected-markdown-lines)
