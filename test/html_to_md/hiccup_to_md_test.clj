@@ -367,6 +367,36 @@
       ["_See the WWW (World Wide Web)_"]
       [:p [:em "See the " [:abbr {:title "World Wide Web"} "WWW"]]])))
 
+(deftest del
+  (testing "Deleted text renders with strikethrough markers"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Simple deleted text
+      ["~~old text~~"]
+      [:del "old text"]
+
+      ;; Deleted text in a paragraph with surrounding text
+      ["The price was ~~$100~~ but now it's $50"]
+      [:p "The price was " [:del "$100"] " but now it's $50"]
+
+      ;; Deleted text at the start of a paragraph
+      ["~~removed~~ text"]
+      [:p [:del "removed"] " text"]
+
+      ;; Deleted text in a list item
+      ["-   ~~old~~ and new"]
+      [:ul [:li [:del "old"] " and new"]]
+
+      ;; Deleted text in a blockquote
+      ["> ~~outdated~~ info"]
+      [:blockquote [:p [:del "outdated"] " info"]]
+
+      ;; Strong inside deleted text
+      ["~~**important**~~"]
+      [:p [:del [:strong "important"]]])))
+
 (deftest line-breaks
   (testing "Line breaks render as newlines inside inline text"
     (are [expected-markdown-lines hiccup]

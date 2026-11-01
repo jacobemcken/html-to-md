@@ -77,9 +77,10 @@
     (cond
       (::fn ctx) ::fn
       (string? element) ::text
-      (#{:article :body :div :footer :nav :section :small :span :time} tag) ::phrasing-content
+      (#{:article :body :div :footer :ins :nav :section :small :span :time} tag) ::phrasing-content
       (#{:abbr :acronym} tag) :abbr
       (#{:b :big :mark :strong} tag) :strong
+      (#{:s :del} tag) :s
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
       :else tag)))
 
@@ -220,6 +221,13 @@
              (mapcat #(render-elements ctx %))
              splice
              (mapv #(update % :text (fn [t] (str t (when title (str " (" title ")")))))))))
+
+(defmethod render-elements :s
+  [ctx element]
+  (some->> (child-elements element)
+           (mapcat #(render-elements ctx %))
+           splice
+           (mapv #(update % :text (fn [t] (str "~~" t "~~"))))))
 
 (defmethod render-elements :strong
   [ctx element]
