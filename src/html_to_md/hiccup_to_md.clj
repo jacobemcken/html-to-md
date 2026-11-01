@@ -83,6 +83,7 @@
       (#{:s :del} tag) :s
       (#{:canvas :iframe :script :style :svg :template} tag) ::ignore
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
+      (#{:code :kbd} tag) :code
       :else tag)))
 
 (comment
@@ -258,17 +259,18 @@
                                 t)))))))
 
 (defmethod render-elements :code
-  ;; Renders inline code wrapped in backticks.
-  ;; Newlines in the code text are replaced by spaces,
-  ;; as inline code must fit on a single line
-  ;; (multi-line code is the job of `:pre`).
+  ;; Wraps code in backticks but avoids continuesly wrapping nested code.
   [ctx element]
-  (some->> (child-elements element)
-           (mapcat #(render-elements ctx %))
-           splice
-           (mapv #(update % :text
-                          (fn [t]
-                            (str "`" (str/replace t #"\s*\n\s*" " ") "`"))))))
+  (let [new-ctx (assoc ctx ::in-code true)]
+    (some->> (child-elements element)
+             (mapcat #(render-elements new-ctx %))
+             splice
+             (mapv #(update % :text
+                            (fn [t]
+                              (let [sanitized-t (str/replace t #"\s*\n\s*" " ")]
+                                (if (::in-code ctx)
+                                  sanitized-t
+                                  (str "`" sanitized-t "`")))))))))
 
 (defmethod render-elements :br
   [_ctx _element]

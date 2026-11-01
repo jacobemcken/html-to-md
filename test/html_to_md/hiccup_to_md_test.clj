@@ -308,7 +308,7 @@
       [:blockquote [:p "See " [:a {:href "https://clojure.org"} "quoted"]]])))
 
 (deftest code
-  (testing "Inline code"
+  (testing "Inline code & kdb"
     (are [expected-markdown-lines hiccup]
          (= (str/join "\n" expected-markdown-lines)
             (sut/as-markdown hiccup))
@@ -316,6 +316,11 @@
       ;; Simple code in a paragraph
       ["Run `clj -X:test` now"]
       [:p "Run " [:code "clj -X:test"] " now"]
+
+      ;; Nested elements share a single wrapper (example taken from Mozilla MDN)
+      ["You can also create a new document by pressing the `Ctrl+N` shortcut."]
+      [:p "You can also create a new document by pressing the "
+       [:kbd [:kbd "Ctrl"] "+" [:kbd "N"]] " shortcut."]
 
       ;; Code inside a link (the case the old ns docstring said didn't work)
       ["[See `core.clj`](https://clojure.org)"]
