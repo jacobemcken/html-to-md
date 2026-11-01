@@ -9,6 +9,7 @@
   (->> html
        hickory/parse
        hickory/as-hiccup
+       (filter #(= :html (first %)))
        first
        hiccup-to-md/child-elements
        (filter #(= :body (first %)))
