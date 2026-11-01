@@ -333,6 +333,40 @@
       ["`foo bar`"]
       [:p [:code "foo\nbar"]])))
 
+(deftest abbr
+  (testing "Abbreviations render as text with optional title in parentheses"
+    (are [expected-markdown-lines hiccup]
+         (= (str/join "\n" expected-markdown-lines)
+            (sut/as-markdown hiccup))
+
+      ;; Simple abbreviation with a title attribute
+      ["HTML (HyperText Markup Language)"]
+      [:abbr {:title "HyperText Markup Language"} "HTML"]
+
+      ;; Abbreviation without a title attribute is plain text
+      ["WWW"]
+      [:abbr "WWW"]
+
+      ;; Abbreviation in a paragraph with surrounding text
+      ["See WWW (World Wide Web) for details"]
+      [:p "See " [:abbr {:title "World Wide Web"} "WWW"] " for details"]
+
+      ;; Multiple abbreviations in one paragraph
+      ["WWW (World Wide Web) and HTML (HyperText Markup Language)"]
+      [:p [:abbr {:title "World Wide Web"} "WWW"] " and " [:abbr {:title "HyperText Markup Language"} "HTML"]]
+
+      ;; Abbreviation in a list item
+      ["-   Visit WWW (World Wide Web)"]
+      [:ul [:li "Visit " [:abbr {:title "World Wide Web"} "WWW"]]]
+
+      ;; Abbreviation in a blockquote
+      ["> See the WWW (World Wide Web)"]
+      [:blockquote [:p "See the " [:abbr {:title "World Wide Web"} "WWW"]]]
+
+      ;; Abbreviation inside emphasis
+      ["_See the WWW (World Wide Web)_"]
+      [:p [:em "See the " [:abbr {:title "World Wide Web"} "WWW"]]])))
+
 (deftest line-breaks
   (testing "Line breaks render as newlines inside inline text"
     (are [expected-markdown-lines hiccup]

@@ -78,6 +78,7 @@
       (::fn ctx) ::fn
       (string? element) ::text
       (#{:article :body :div :footer :nav :section :small :span :time} tag) ::phrasing-content
+      (#{:abbr :acronym} tag) :abbr
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
       :else tag)))
 
@@ -210,6 +211,14 @@
            (mapcat #(render-elements ctx %))
            splice
            (mapv #(update % :text (fn [t] (str "_" t "_"))))))
+
+(defmethod render-elements :abbr
+  [ctx element]
+  (let [title (:title (second element))]
+    (some->> (child-elements element)
+             (mapcat #(render-elements ctx %))
+             splice
+             (mapv #(update % :text (fn [t] (str t (when title (str " (" title ")")))))))))
 
 (defmethod render-elements :strong
   [ctx element]
