@@ -79,6 +79,7 @@
       (string? element) ::text
       (#{:article :body :div :footer :nav :section :small :span :time} tag) ::phrasing-content
       (#{:abbr :acronym} tag) :abbr
+      (#{:b :big :mark :strong} tag) :strong
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
       :else tag)))
 
