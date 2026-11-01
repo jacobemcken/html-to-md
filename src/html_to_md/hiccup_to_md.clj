@@ -81,6 +81,7 @@
       (#{:abbr :acronym} tag) :abbr
       (#{:b :big :mark :strong} tag) :strong
       (#{:s :del} tag) :s
+      (#{:canvas :iframe :script :style :svg :template} tag) ::ignore
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
       :else tag)))
 
@@ -95,6 +96,10 @@
       ;(println (some-> (:li _ctx) deref no-infinity))
       (or dispatch-value
           (throw (ex-info "Unable to parse element" {:element element}))))))
+
+(defmethod render-elements ::ignore
+  [_ctx _element]
+  nil)
 
 (defmethod render-elements ::phrasing-content
   [ctx element]
