@@ -354,9 +354,18 @@
 
 (def unfoldz (simplify-unfold unfold))
 
+(defn decode-html-entities
+  "Reverses escaping of HTML entities done during HTML->Hiccup."
+  [s]
+  (-> s
+      (str/replace "&lt;" "<")
+      (str/replace "&gt;" ">")
+      (str/replace "&quot;" "\"")
+      (str/replace "&amp;" "&")))
+
 (defn render-text
   [prefix-seqs text]
-  (->> (str/split (or text "") #"\n")
+  (->> (str/split (decode-html-entities (or text "")) #"\n")
        (conj prefix-seqs)
        (apply map str)))
 
