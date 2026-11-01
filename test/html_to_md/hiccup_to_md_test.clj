@@ -287,6 +287,9 @@
       ["[Some _italic_ link](https://clojure.org)"]
       [:a {:href "https://clojure.org"} "Some " [:em "italic"] " link"]
 
+      ["[Some link](https://clojure.org)"]
+      [:a {:href "https://clojure.org"} [:span "Some"] " " [:span "link"]]
+
       ;; A link inside emphasis (the reverse nesting)
       ["_Some [link](https://clojure.org) here_"]
       [:p [:em "Some " [:a {:href "https://clojure.org"} "link"] " here"]]
