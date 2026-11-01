@@ -77,7 +77,7 @@
     (cond
       (::fn ctx) ::fn
       (string? element) ::text
-      (#{:span :div :small :body :nav :article :time :footer :section} tag) ::phrasing-content
+      (#{:article :body :div :footer :nav :section :small :span :time} tag) ::phrasing-content
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
       :else tag)))
 
