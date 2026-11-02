@@ -23,6 +23,16 @@ Running test suite:
 
     clj -X:test
 
+### Build
+
+Build the artifact:
+
+    clj -T:build
+
+Install in local Maven cache:
+
+    clj -T:build install
+
 
 ## Architecture
 
