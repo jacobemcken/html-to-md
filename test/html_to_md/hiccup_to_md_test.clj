@@ -594,3 +594,22 @@
       ;; ...emphasis inside a list item.
       [""]
       [:ul [:li [:em " " " "]]])))
+
+(deftest tables
+  (testing "Tables are rendered back to raw HTML"
+    (are [expected-markdown hiccup]
+         (= expected-markdown
+            (sut/as-markdown hiccup))
+
+      ;; Simple table with attributes (as Hickory produces them)
+      "<table><tbody><tr><td>Hej</td><td>Hello</td></tr><tr><td>Hej</td><td>Hello</td></tr></tbody></table>"
+      [:body [:table {}
+              [:tbody {}
+               [:tr {} [:td {} "Hej"] [:td {} "Hello"]]
+               [:tr {} [:td {} "Hej"] [:td {} "Hello"]]]]]
+
+      ;; Table without explicit tbody (hand-written hiccup)
+      "<table><tr><td>a</td><td>b</td></tr><tr><td>c</td><td>d</td></tr></table>"
+      [:body [:table
+              [:tr [:td "a"] [:td "b"]]
+              [:tr [:td "c"] [:td "d"]]]])))

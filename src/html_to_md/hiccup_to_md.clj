@@ -6,6 +6,7 @@
 
    Got differenciated margins working."
   (:require [clojure.string :as str]
+            [hickory.render :as hickory-render]
             [html-to-md.debug :refer [simplify-unfold]]))
 
 (defn block?
@@ -124,6 +125,13 @@
            splice
            (as-block {:spacing ::always})
            list))
+
+(defmethod render-elements :table
+  [_ctx element]
+  ;; Render the table back to raw HTML and emit it as a single inline block.
+  [(as-block {:spacing ::always}
+             [{:left 0 :right 0
+               :text (hickory-render/hiccup-to-html [element])}])])
 
 (def unordered-list-prefixes
   (repeat (concat ["-   "] (repeat "    "))))
