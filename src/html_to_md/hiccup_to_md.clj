@@ -100,10 +100,13 @@
       ;(println "got        " (no-infinity element)) (println "dispatch to" dispatch-value)
       ;(println (some-> (:li _ctx) deref no-infinity))
       (or dispatch-value
-          ::ignore
           (throw (ex-info "Unable to parse element" {:element element}))))))
 
 (defmethod render-elements ::ignore
+  [_ctx _element]
+  nil)
+
+(defmethod render-elements :default
   [_ctx _element]
   nil)
 
