@@ -78,7 +78,8 @@
     (cond
       (::fn ctx) ::fn
       (string? element) ::text
-      (#{:article :aside :body :center :footer :header :ins :main :nav :section :small :span :sub :sup :time} tag) ::phrasing-content
+      (or (::inline ctx)
+          (#{:article :aside :body :center :footer :header :ins :main :nav :section :small :span :sub :sup :time} tag)) ::phrasing-content
       (#{:abbr :acronym} tag) :abbr
       (#{:b :big :mark :strong} tag) :strong
       (#{:s :del} tag) :s
@@ -263,9 +264,10 @@
   ;; as a Markdown link must fit on a single line.
   ;; A link without an `:href` attribute is rendered as plain text.
   [ctx element]
-  (let [href (when (map? (second element)) (:href (second element)))]
+  (let [href (when (map? (second element)) (:href (second element)))
+        new-ctx (assoc ctx ::inline true)]
     (some->> (child-elements element)
-             (mapcat #(render-elements ctx %))
+             (mapcat #(render-elements new-ctx %))
              splice
              (mapv #(update % :text
                             (fn [t]
