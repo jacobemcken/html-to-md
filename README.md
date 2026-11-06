@@ -91,19 +91,33 @@ More text,
 across multiple lines.
 ```
 
-#### Example 3 - mixed content
+#### Example 3 - mixed content (complicated)
 
 ```html
-<p>Some <span>text!</span></p> <p>More text,
-across <strong>multiple </strong>lines.</p>
+<ul>
+  <li>Apple</li>
+  <li>Banana
+    <ol>
+      <li>The <code>yellow</code> one.</li>
+      <li><div><blockquote><p>A <em>sunflower</em> would 
+          <span style="color:purple;">be jealous</span>.
+          </p><p><strong>Even</strong><br>the sun.</p></blockquote></div></li>
+    </ol>
+  </li>
+  <li>Kiwi</li>
+</ul>
 ```
 
 becomes:
 ```
-Some text!
-
-More text,
-across **multiple** lines.
+-   Apple
+-   Banana
+    1.  The `yellow` one.
+    2.  > A _sunflower_ would be jealous.
+        > 
+        > **Even**  
+        > the sun.
+-   Kiwi
 ```
 
 ### Technical implementation
