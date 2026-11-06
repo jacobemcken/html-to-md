@@ -18,3 +18,9 @@
 (defn convert
   [html]
   (hiccup-to-md/as-markdown (get-hiccup-body html)))
+
+(defn -main [& args]
+  (-> (slurp (first args))
+      (convert)
+      println)
+  nil)
