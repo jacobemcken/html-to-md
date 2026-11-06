@@ -19,9 +19,14 @@ into clean Markdown that is both human readable and LLM token-efficient.
 
 ### Test suite
 
-Running test suite:
+Running test suite using vanilla Clojure:
 
     clj -X:test
+
+Running test suite using Babashka:
+
+    bb test
+
 
 ### Build
 

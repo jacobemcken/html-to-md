@@ -1,3 +1,10 @@
 {:deps {org.clj-commons/hickory {:mvn/version "0.7.7"}}
  :paths ["src"]
- :bbin/bin {html-to-md {:main-opts ["-m" "html-to-md.core"]}}}
+ :bbin/bin {html-to-md {:main-opts ["-m" "html-to-md.core"]}}
+ :tasks {test {:extra-paths ["test"]
+               :extra-deps {io.github.cognitect-labs/test-runner
+                            {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+               :task (exec 'cognitect.test-runner.api/test)
+               :exec-args {:dirs ["test"]}
+               :org.babashka/cli {:coerce {:nses [:symbol]
+                                           :vars [:symbol]}}}}}
