@@ -129,9 +129,9 @@ There are two dimensions of complexity that the implementation needs to account 
     -   Vertical between block content
 
 All content that isn't block content is considered inline.
-Block content (not all are currently supported):
+Block content:
 
-- Paragraphs (`:p`)
+- Paragraphs (`:p` & `:div`)
 - Headers (`:h1` - `:h6`)
 - Lists (`:ul` & `:ol`)
 - List elements (`:li`)
