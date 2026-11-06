@@ -82,7 +82,7 @@
       (#{:abbr :acronym} tag) :abbr
       (#{:b :big :mark :strong} tag) :strong
       (#{:s :del} tag) :s
-      (#{:canvas :iframe :script :style :svg :template} tag) ::ignore
+      (#{:canvas :iframe :link :script :style :svg :template} tag) ::ignore
       ;; The following tags are still undecided or not implemented
       (#{:figure :button :label :summary :details :meta :dl :dt :dd} tag) ::phrasing-content
       (#{:h1 :h2 :h3 :h4 :h5 :h6} tag) ::heading
