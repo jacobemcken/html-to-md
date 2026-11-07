@@ -52,25 +52,10 @@ Install in local Maven cache:
 
 ## Architecture
 
-The library consists of two transformation layers:
+The library converts HTML to Markdown in two steps:
+HTML to Hiccup (via Hickory) and then Hiccup to Markdown.
 
-```mermaid
-graph LR
-    A[HTML] -- transform --> B
-    B[Hiccup] -- transform --> C
-    C[Markdown]
-```
-
-An existing library [Hickory][1] already handles HTML to Hiccup conversion quite well,
-**so this library just uses Hickory and focuses on Hiccup to Markdown conversion**.
-But includes Hickory as a dependency for convenience.
-
-To be able to generate "good looking" Markdown (without unnecessary whitespace),
-content is categorized as either "inline" or "block" content.
-The [content categories are borrowed from CSS because][2] they have some conceptual overlap.
-Block content uses newlines to distance itself from other content.
-Inline content uses space to distance itself from other content.
-
+See [docs/architecture.md](docs/architecture.md) for details.
 
 ### Examples
 
@@ -130,33 +115,3 @@ becomes:
         > the sun.
 -   Kiwi
 ```
-
-### Technical implementation
-
-There are two dimensions of complexity that the implementation needs to account for:
--   Prefixes related to nesting: lists within blockquotes within lists
--   Spacing
-    -   Horizontal between inline content
-    -   Vertical between block content
-
-All content that isn't block content is considered inline.
-Block content:
-
-- Paragraphs (`:p` & `:div`)
-- Headers (`:h1` - `:h6`)
-- Lists (`:ul` & `:ol`)
-- List elements (`:li`)
-- Blockquotes (`:blockquote`)
-- Preformatted (`:pre`)
-- Horizontal ruler (`:hr`)
-- Tables
-
-A few examples of inline content:
-
-- Links (`:a`) - also known as hyperlinks or anchors.
-- Emphasis (`:em`)
-- Code (`:code`)
-- and many more...
-
-[1]: https://github.com/clj-commons/hickory
-[2]: https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Display/Block_and_inline_layout
