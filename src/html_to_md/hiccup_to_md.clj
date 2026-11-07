@@ -2,9 +2,7 @@
   "This namespace works on hiccup data structures.
 
    There is a lot of infinite sequences, that can make debugging a bit annoying.
-   Consider using html-to-md.debug/no-infinity to reduce output.
-
-   Got differenciated margins working."
+   Consider using html-to-md.debug/no-infinity to reduce output."
   (:require [clojure.string :as str]
             [hickory.render :as hickory-render]
             [html-to-md.debug :refer [simplify-unfold]]))
@@ -299,7 +297,7 @@
     [{:left 0 :right 0 :text (str "!" "[" (or alt "") "](" src ")")}]))
 
 (defn calc-inline-margins
-  "Calculate margins of inline content."
+  "Calculate margins of inline content (`CharSequence`)."
   [^CharSequence s]
   (let [len (.length s)]
     (if (zero? len)
@@ -381,12 +379,17 @@
       (str/replace "&amp;" "&")))
 
 (defn render-text
+  "Takes `prefix-seq` (which can be empty) together with a text string,
+   and returns the text with any provided prefix(s).
+   Also, HTML entities encoded by hiccup are cleaned up (reversed)."
   [prefix-seqs text]
   (->> (str/split (decode-html-entities (or text "")) #"\n")
        (conj prefix-seqs)
        (apply map str)))
 
 (defn arrange
+  "The final function converting the intermediate data structure representing markdown
+   and converting it to strings."
   [all-elements] ; TODO markdown elements
   (loop [elements all-elements
          [margin-to-previous previous-prefix-seqs] [::text []]
@@ -412,5 +415,5 @@
   (->> (render-elements {} hiccup)
        ;; `unfoldz` is a debug version of `unfold`,
        ;; truncating infinite prefix sequences to ease local debugging in REPL.
-       (unfoldz '() {:before ::block :after ::block})
+       (unfoldz [] {:before ::block :after ::block})
        arrange))

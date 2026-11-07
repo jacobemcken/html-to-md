@@ -2,7 +2,7 @@
   (:require [hickory.core :as hickory]
             [html-to-md.hiccup-to-md :as hiccup-to-md]))
 
-(defn get-hiccup-body
+(defn ^:no-doc get-hiccup-body
   "Takes a HTML string, converts it to Hiccup and return the `:body` element.
    Stripping the `:html` and `:head` tags."
   [html]
@@ -16,10 +16,14 @@
        first))
 
 (defn convert
-  [html]
-  (hiccup-to-md/as-markdown (get-hiccup-body html)))
+  "Takes an HTML string which is then converted and returned as a markdown formatted string."
+  [html-str]
+  (hiccup-to-md/as-markdown (get-hiccup-body html-str)))
 
-(defn -main [& args]
+(defn -main
+  "Main funtion used for `bbin` CLI integration.
+   See `README.md` for installation guidance."
+  [& args]
   (-> (slurp (first args))
       (convert)
       println)
