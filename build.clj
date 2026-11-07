@@ -9,6 +9,17 @@
 ;; delay to defer side effects (artifact downloads)
 (def basis (delay (b/create-basis {:project "deps.edn"})))
 
+(def pom
+  [[:description "Convert HTML to markdown text."]
+   [:url "https://github.com/jacobemcken/html-to-md"]
+   [:licenses
+    [:license
+     [:name "The MIT License (MIT)"]]]
+   [:developers
+    [:developer
+     [:name "Jacob Emcken"]
+     [:url "https://www.emcken.dk"]]]])
+
 (defn clean [_]
   (b/delete {:path "target"}))
 
@@ -17,16 +28,16 @@
                 :lib lib
                 :version version
                 :basis @basis
-                :src-dirs ["src"]})
+                :src-dirs ["src"]
+                :pom-data pom})
   (b/copy-dir {:src-dirs ["src" "resources"]
                :target-dir class-dir})
   (b/jar {:class-dir class-dir
           :jar-file jar-file}))
 
 (defn install [_]
-  (jar nil)
   (b/install {:basis basis
               :lib lib
               :version version
               :class-dir class-dir
-              :jar-file (str "target/" (name lib) "-" version ".jar")}))
+              :jar-file jar-file}))
