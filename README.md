@@ -15,6 +15,17 @@ into clean Markdown that is both human readable and LLM token-efficient.
 ; "# Some heading\n\nFollowed by some text"
 ```
 
+## Install
+
+Use it as a cli tool via `bbin`:
+
+    bbin install https://github.com/jacobemcken/html-to-md.git
+
+The use it like:
+
+    html-to-md https://www.emcken.dk
+
+
 ## Development
 
 ### Test suite
