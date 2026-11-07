@@ -6,7 +6,8 @@
                   :main-opts ["-m" "cognitect.test-runner"]
                   :exec-fn cognitect.test-runner.api/test}
            :install {:main-opts ["-m" "clojure.tools.deps.alpha/publish-local"]}
-           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}}
+           :build {:deps {io.github.babashka/deps-deploy {:mvn/version "0.0.1"}
+                          io.github.clojure/tools.build {:mvn/version "0.10.14"}}
                    :ns-default build}
            :nrepl {:extra-paths ["test"]
                    :extra-deps {nrepl/nrepl {:mvn/version "1.7.0"}}

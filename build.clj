@@ -1,5 +1,6 @@
 (ns build
-  (:require [clojure.tools.build.api :as b]))
+  (:require [babashka.deps-deploy :as dd]
+            [clojure.tools.build.api :as b]))
 
 (def lib 'dk.emcken/html-to-md)
 (def version "0.8.0")
@@ -41,3 +42,11 @@
               :version version
               :class-dir class-dir
               :jar-file jar-file}))
+
+(defn deploy
+  "Deploy the JAR to Clojars."
+  [_]
+  (dd/deploy {:installer :remote
+              :artifact (b/resolve-path jar-file)
+              :pom-file (b/pom-path {:lib lib
+                                     :class-dir class-dir})}))
