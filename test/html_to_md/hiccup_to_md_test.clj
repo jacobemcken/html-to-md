@@ -222,12 +222,12 @@
     (are [markdown hiccup]
          (= markdown (sut/as-markdown hiccup))
 
-      "# Level one"     [:body [:h1 "Level one"]]
-      "## Level two"    [:body [:h2 "Level two"]]
-      "### Level three" [:body [:h3 "Level three"]]
-      "#### Level four" [:body [:h4 "Level four"]]
-      "##### Level five" [:body [:h5 "Level five"]]
-      "###### Level six" [:body [:h6 "Level six"]])))
+      "# Level one" [:h1 "Level one"]
+      "## Level two" [:h2 "Level two"]
+      "### Level three" [:h3 "Level three"]
+      "#### Level four" [:h4 "Level four"]
+      "##### Level five" [:h5 "Level five"]
+      "###### Level six" [:h6 "Level six"])))
 
 (deftest inline-formatting
   (testing "Inline formatting"
