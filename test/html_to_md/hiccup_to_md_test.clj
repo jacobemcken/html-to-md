@@ -308,7 +308,20 @@
 
       ;; Links in blockquotes
       ["> See [quoted](https://clojure.org)"]
-      [:blockquote [:p "See " [:a {:href "https://clojure.org"} "quoted"]]])))
+      [:blockquote [:p "See " [:a {:href "https://clojure.org"} "quoted"]]]
+
+      ;; Links around block content
+      ["[The following references https://clojure.org](https://clojure.org)"
+       ""
+       "# Clojure"
+       ""
+       "A functional programming language"
+       ""
+       "[Reference to https://clojure.org ended](https://clojure.org)"]
+      [:a {:href "https://clojure.org"}
+       [:div
+        [:h1 "Clojure"]
+        [:p "A functional programming language"]]])))
 
 (deftest code
   (testing "Inline code & kdb"

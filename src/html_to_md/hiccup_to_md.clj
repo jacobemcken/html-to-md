@@ -76,8 +76,7 @@
     (cond
       (::fn ctx) ::fn
       (string? element) ::text
-      (or (::inline ctx)
-          (#{:article :aside :body :center :footer :header :ins :main :nav :section :small :span :sub :sup :time} tag)) ::phrasing-content
+      (#{:article :aside :body :center :footer :header :ins :main :nav :section :small :span :sub :sup :time} tag) ::phrasing-content
       (#{:abbr :acronym} tag) :abbr
       (#{:b :big :mark :strong} tag) :strong
       (#{:s :del} tag) :s
@@ -256,22 +255,39 @@
            splice
            (mapv #(update % :text (fn [t] (str "**" t "**"))))))
 
+(defn wrap-complex-link-content
+  [url flow-elements]
+  (concat [{:left 0 :right 0 :text (str "The following references " url)}]
+          flow-elements
+          [{:left 0 :right 0 :text (str "Reference to " url " ended")}]))
+
+(defn avoid-complex-links
+  "This hairy function manages complex HTML content wrapped in a link.
+   Instead of trying to wrap a markdown link around all of it,
+   it references the link in the beginning, then insert all the complex content,
+   then mentions that the link is no longer being referenced."
+  [url flow-elements]
+  (if (empty? url)
+    flow-elements
+    (cond->> flow-elements
+      ;; Identify complex links to avoid nesting (block) markdown
+      (or (< 1 (count flow-elements)) ; inline only content never exceeds 1
+          (vector? (first flow-elements))) ; blocks are vectors
+      (wrap-complex-link-content url)
+
+      :always ; if there is no URL the function has already exited
+      (mapv #(if (map? %)
+               (update % :text (fn [t] (str "[" (str/replace t #"\s*\n\s*" " ") "](" url ")")))
+               %)))))
+
 (defmethod render-elements :a
-  ;; Renders a link as `[text](href)`.
-  ;; Newlines in the link text are replaced by spaces,
-  ;; as a Markdown link must fit on a single line.
-  ;; A link without an `:href` attribute is rendered as plain text.
   [ctx element]
-  (let [href (when (map? (second element)) (:href (second element)))
-        new-ctx (assoc ctx ::inline true)]
+  (let [href (when (map? (second element))
+               (-> element second :href (or "") str/trim))]
     (some->> (child-elements element)
-             (mapcat #(render-elements new-ctx %))
+             (mapcat #(render-elements ctx %))
              splice
-             (mapv #(update % :text
-                            (fn [t]
-                              (if href
-                                (str "[" (str/replace t #"\s*\n\s*" " ") "](" href ")")
-                                t)))))))
+             (avoid-complex-links href))))
 
 (defmethod render-elements :code
   ;; Wraps code in backticks but avoids continuesly wrapping nested code.
