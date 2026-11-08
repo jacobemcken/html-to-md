@@ -315,6 +315,14 @@
       ["> See [quoted](https://clojure.org)"]
       [:blockquote [:p "See " [:a {:href "https://clojure.org"} "quoted"]]]
 
+      ;; Link text is empty
+      ["Link text"]
+      [:body {} "Link text " [:a {:class "header-anchor" :href "#width"} " "]] ; using empty string
+      ["Link text"]
+      [:body {} "Link text " [:a {:class "header-anchor" :href "#width"} "​"]] ; using "zero width space"-char
+      ["Link text"]
+      [:body {} "Link text " [:a {:class "header-anchor" :href "#width"} " "]] ; using a space char
+
       ;; Links around block content
       ["[The following references https://clojure.org](https://clojure.org)"
        ""

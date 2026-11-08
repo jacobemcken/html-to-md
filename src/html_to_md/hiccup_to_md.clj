@@ -261,6 +261,9 @@
           flow-elements
           [{:left 0 :right 0 :text (str "Reference to " url " ended")}]))
 
+(def zero-width-space
+  (str (char 0x200B)))
+
 (defn avoid-complex-links
   "This hairy function manages complex HTML content wrapped in a link.
    Instead of trying to wrap a markdown link around all of it,
@@ -277,7 +280,13 @@
 
       :always ; if there is no URL the function has already exited
       (mapv #(if (map? %)
-               (update % :text (fn [t] (str "[" (str/replace t #"\s*\n\s*" " ") "](" url ")")))
+               (update % :text (fn [t]
+                                 (when-let [sanitized-t (-> t
+                                                            (str/replace zero-width-space "")
+                                                            (str/replace #"\s*\n\s*" " ")
+                                                            str/trim
+                                                            not-empty)]
+                                   (str "[" sanitized-t "](" url ")"))))
                %)))))
 
 (defmethod render-elements :a
