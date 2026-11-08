@@ -47,6 +47,11 @@
       '({:text "A  B" :left 2 :right 3}) '({:text "A" :left 2 :right 1}
                                            {:text "B" :left 2 :right 3}))))
 
+(deftest ignore-html-comments
+  (testing "HTML comments are ignored"
+    (is (= "a c"
+           (sut/as-markdown [:body {} "a " "<!-- <b>x</b> -->" " c"])))))
+
 (deftest lists
   (testing "Unordered lists"
     (are [markdown-lines hiccup]

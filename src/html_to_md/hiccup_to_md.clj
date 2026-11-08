@@ -332,7 +332,7 @@
 
 (defmethod render-elements ::text
   [_ctx text-element]
-  (-> text-element
+  (-> (if (str/starts-with? text-element "<!--") "" text-element)
       as-flow
       (cons '())))
 
