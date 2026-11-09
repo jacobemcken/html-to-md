@@ -3,7 +3,7 @@
             [clojure.tools.build.api :as b]))
 
 (def lib 'dk.emcken/html-to-md)
-(def version "0.8.0")
+(def version "0.8.1")
 (def class-dir "target/classes")
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
 

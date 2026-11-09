@@ -1,4 +1,4 @@
-{:deps {org.clj-commons/hickory {:mvn/version "0.7.7"}}
+{:deps {org.clj-commons/hickory {:mvn/version "0.7.8"}}
  :paths ["src"]
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner
