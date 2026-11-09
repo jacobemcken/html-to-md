@@ -5,7 +5,7 @@
    Consider using html-to-md.debug/no-infinity to reduce output."
   (:require [clojure.string :as str]
             [hickory.render :as hickory-render]
-            [html-to-md.debug :refer [simplify-unfold]]))
+            #_[html-to-md.debug :refer [no-infinity simplify-unfold]]))
 
 (defn block?
   [element]
@@ -89,14 +89,14 @@
       :else tag)))
 
 (comment
+  ;; to easily re-evaluate the multimethod (dispatching)
   (ns-unmap *ns* 'render-elements)
-  (require '[html-to-md.debug :refer [no-infinity]])
-  )
+)
 (defmulti render-elements
   (fn identify-element [ctx element]
     (let [dispatch-value (identify-tag-handler ctx element)]
       ;(println "got        " (no-infinity element)) (println "dispatch to" dispatch-value)
-      ;(println (some-> (:li _ctx) deref no-infinity))
+      ;(println (some-> (:li ctx) deref no-infinity))
       (or dispatch-value
           (throw (ex-info "Unable to parse element" {:element element}))))))
 
@@ -111,7 +111,6 @@
 (defmethod render-elements ::phrasing-content
   [ctx element]
   (->> (child-elements element)
-       ;(map #(do (println "children" %) %))
        (mapcat #(render-elements ctx %))
        ;; splice again after unpacking to support nested formatting like emphasised code
        splice))
@@ -392,7 +391,6 @@
                                      :prefix new-prefix-seq}]
                    (concat return-elements [text-element]))))))))
 
-(def unfoldz (simplify-unfold unfold))
 
 (defn decode-html-entities
   "Reverses escaping of HTML entities done during HTML->Hiccup."
@@ -435,10 +433,12 @@
                            (render-text (skip-first prefix-seqs) "")))
                        (render-text prefix text)))))))
 
+;; `unfoldz` is a debug version of `unfold`,
+;; truncating infinite prefix sequences to ease local debugging in REPL.
+;(def unfold (simplify-unfold unfold))
+
 (defn as-markdown
   [hiccup]
   (->> (render-elements {} hiccup)
-       ;; `unfoldz` is a debug version of `unfold`,
-       ;; truncating infinite prefix sequences to ease local debugging in REPL.
-       (unfoldz [] {:before ::block :after ::block})
+       (unfold [] {:before ::block :after ::block})
        arrange))
